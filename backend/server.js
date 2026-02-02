@@ -23,7 +23,12 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to KUSCO API' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start server (only in non-serverless environment)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Export for Vercel
+module.exports = app;
