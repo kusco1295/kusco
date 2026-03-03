@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminLayout from './components/AdminLayout';
 import { useAuth } from './hooks/useAuth';
 import { ROUTES } from './constants/endpoints';
 
@@ -10,6 +11,11 @@ import Home from './pages/Home';
 import AdminLogin from './pages/AdminLogin';
 import AdminSignup from './pages/AdminSignup';
 import AdminDashboard from './pages/AdminDashboard';
+import DepartmentPage from './pages/DepartmentPage';
+import CustomerPage from './pages/CustomerPage';
+import TasksManagerPage from './pages/TasksManagerPage';
+import MessagesPage from './pages/MessagesPage';
+import TeamsPage from './pages/TeamsPage';
 
 // Inner component that uses useAuth
 const AppRoutes = () => {
@@ -24,7 +30,7 @@ const AppRoutes = () => {
       {/* Home Route */}
       <Route path={ROUTES.HOME} element={<Home />} />
 
-      {/* Admin Routes */}
+      {/* Admin Auth Routes */}
       <Route
         path={ROUTES.ADMIN_LOGIN}
         element={
@@ -45,14 +51,22 @@ const AppRoutes = () => {
           )
         }
       />
+
+      {/* Protected Admin Routes with Sidebar Layout (pathless) */}
       <Route
-        path={ROUTES.ADMIN_DASHBOARD}
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path={ROUTES.ADMIN_DASHBOARD} element={<AdminDashboard />} />
+        <Route path={ROUTES.ADMIN_DEPARTMENT} element={<DepartmentPage />} />
+        <Route path={ROUTES.ADMIN_CUSTOMER} element={<CustomerPage />} />
+        <Route path={ROUTES.ADMIN_TASKS} element={<TasksManagerPage />} />
+        <Route path={ROUTES.ADMIN_MESSAGES} element={<MessagesPage />} />
+        <Route path={ROUTES.ADMIN_TEAMS} element={<TeamsPage />} />
+      </Route>
     </Routes>
   );
 };

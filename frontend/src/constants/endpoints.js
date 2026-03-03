@@ -12,4 +12,9 @@ export const ROUTES = {
   ADMIN_LOGIN: '/admin',
   ADMIN_SIGNUP: '/admin/signup',
   ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN_DEPARTMENT: '/admin/department',
+  ADMIN_CUSTOMER: '/admin/customers',
+  ADMIN_TASKS: '/admin/tasks',
+  ADMIN_MESSAGES: '/admin/messages',
+  ADMIN_TEAMS: '/admin/teams',
 };
