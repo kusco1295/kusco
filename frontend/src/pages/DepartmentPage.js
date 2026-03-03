@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/Department.css';
 
 const DepartmentPage = () => {
   return (

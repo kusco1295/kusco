@@ -19,6 +19,21 @@ export const adminAPI = {
   signup: (data) => api.post('/admin/signup', data),
   login: (data) => api.post('/admin/login', data),
   getMe: () => api.get('/admin/me'),
+  getAllMembers: () => api.get('/admin/all'),
+  updateMember: (id, data) => api.put(`/admin/${id}`, data),
+};
+
+export const taskAPI = {
+  create: (formData) => api.post('/tasks', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  getAll: () => api.get('/tasks'),
+  update: (id, data) => api.put(`/tasks/${id}`, data),
+};
+
+export const customerAPI = {
+  getAll: () => api.get('/customers'),
+  create: (data) => api.post('/customers', data),
+  update: (id, data) => api.put(`/customers/${id}`, data),
+  delete: (id) => api.delete(`/customers/${id}`),
 };
 
 export default api;

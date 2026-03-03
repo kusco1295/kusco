@@ -3,7 +3,7 @@ const { generateToken } = require('../utils/jwt.util');
 const ROLES = require('../constants/roles');
 
 class AdminService {
-  async registerAdmin(name, email, password, confirmPassword) {
+  async registerAdmin(name, email, password, confirmPassword, role) {
     // Validation
     if (password !== confirmPassword) {
       throw new Error('Passwords do not match');
@@ -15,12 +15,14 @@ class AdminService {
       throw new Error('Email already registered');
     }
 
+    const assignedRole = role && [ROLES.ADMIN, ROLES.MEMBER].includes(role) ? role : ROLES.MEMBER;
+
     // Create new admin
     const admin = new Admin({
       name,
       email,
       password,
-      role: ROLES.ADMIN,
+      role: assignedRole,
     });
 
     await admin.save();
@@ -62,6 +64,35 @@ class AdminService {
         role: admin.role,
       },
     };
+  }
+
+  async updateAdmin(id, { name, email, role }) {
+    const admin = await Admin.findById(id);
+    if (!admin) throw new Error('Member not found');
+
+    if (name) admin.name = name;
+    if (email) admin.email = email;
+    if (role && [ROLES.ADMIN, ROLES.MEMBER].includes(role)) admin.role = role;
+
+    await admin.save();
+
+    return {
+      id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+    };
+  }
+
+  async getAllAdmins() {
+    const admins = await Admin.find().select('-password').sort({ createdAt: -1 });
+    return admins.map((admin) => ({
+      id: admin._id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+      createdAt: admin.createdAt,
+    }));
   }
 
   async getAdminById(id) {

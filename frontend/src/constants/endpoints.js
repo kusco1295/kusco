@@ -15,6 +15,8 @@ export const ROUTES = {
   ADMIN_DEPARTMENT: '/admin/department',
   ADMIN_CUSTOMER: '/admin/customers',
   ADMIN_TASKS: '/admin/tasks',
+  ADMIN_CREATE_TASK: '/admin/create-task',
+  ADMIN_EDIT_TASK: '/admin/edit-task',
   ADMIN_MESSAGES: '/admin/messages',
   ADMIN_TEAMS: '/admin/teams',
 };

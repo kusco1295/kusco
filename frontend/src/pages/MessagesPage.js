@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/Messages.css';
 
 const MessagesPage = () => {
   return (

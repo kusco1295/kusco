@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { adminAPI } from '../services/adminAPI';
+import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const { admin, updateAdmin } = useAuth();

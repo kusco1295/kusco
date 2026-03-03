@@ -4,14 +4,14 @@ const { successResponse, errorResponse } = require('../utils/response.util');
 class AdminController {
   async signup(req, res) {
     try {
-      const { name, email, password, confirmPassword } = req.body;
+      const { name, email, password, confirmPassword, role } = req.body;
 
       // Validation
       if (!name || !email || !password || !confirmPassword) {
         return errorResponse(res, 'All fields are required', 400);
       }
 
-      const result = await adminService.registerAdmin(name, email, password, confirmPassword);
+      const result = await adminService.registerAdmin(name, email, password, confirmPassword, role);
 
       return successResponse(
         res,
@@ -38,6 +38,26 @@ class AdminController {
       return successResponse(res, result, 'Login successful', 200);
     } catch (error) {
       return errorResponse(res, error.message, 401, error);
+    }
+  }
+
+  async update(req, res) {
+    try {
+      const { id } = req.params;
+      const { name, email, role } = req.body;
+      const admin = await adminService.updateAdmin(id, { name, email, role });
+      return successResponse(res, { admin }, 'Member updated successfully', 200);
+    } catch (error) {
+      return errorResponse(res, error.message, 400, error);
+    }
+  }
+
+  async getAll(req, res) {
+    try {
+      const admins = await adminService.getAllAdmins();
+      return successResponse(res, { admins }, 'Members fetched successfully', 200);
+    } catch (error) {
+      return errorResponse(res, error.message, 500, error);
     }
   }
 

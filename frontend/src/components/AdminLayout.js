@@ -19,7 +19,7 @@ const navItems = [
   { label: 'Dashboard', icon: <MdDashboard />, path: ROUTES.ADMIN_DASHBOARD, end: true },
   { label: 'Department', icon: <MdBusiness />, path: ROUTES.ADMIN_DEPARTMENT },
   { label: 'Customer', icon: <MdPeople />, path: ROUTES.ADMIN_CUSTOMER },
-  { label: 'Tasks Manager', icon: <MdAssignment />, path: ROUTES.ADMIN_TASKS },
+  { label: 'Manage Tasks', icon: <MdAssignment />, path: ROUTES.ADMIN_TASKS },
   { label: 'Messages', icon: <MdMessage />, path: ROUTES.ADMIN_MESSAGES },
   { label: 'Teams', icon: <MdGroups />, path: ROUTES.ADMIN_TEAMS },
 ];
