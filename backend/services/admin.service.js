@@ -42,13 +42,13 @@ class AdminService {
     // Find admin by email
     const admin = await Admin.findOne({ email });
     if (!admin) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid email');
     }
 
     // Check password
     const isPasswordCorrect = await admin.comparePassword(password);
     if (!isPasswordCorrect) {
-      throw new Error('Invalid email or password');
+      throw new Error('Invalid password');
     }
 
     const token = generateToken(admin._id);
