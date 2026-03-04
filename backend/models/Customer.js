@@ -15,6 +15,7 @@ const customerSchema = new mongoose.Schema(
     pressure: { type: String, trim: true },
     attachment: { type: String },
     description: { type: String, trim: true },
+    department: { type: String, trim: true },
   },
   { timestamps: true }
 );

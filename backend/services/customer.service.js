@@ -5,9 +5,9 @@ class CustomerService {
     return await Customer.find().sort({ createdAt: -1 });
   }
 
-  async createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description }) {
+  async createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description, department }) {
     if (!name) throw new Error('Customer name is required');
-    const customer = new Customer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description });
+    const customer = new Customer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description, department });
     await customer.save();
     return customer;
   }

@@ -83,7 +83,14 @@ const AdminLayout = () => {
           {workOpen && (
             <div className="sidebar-submenu">
               {DEPARTMENTS.map((dept) => (
-                <button key={dept.label} className="sidebar-sublink">
+                <button
+                  key={dept.label}
+                  className="sidebar-sublink"
+                  onClick={() => {
+                    navigate(`${ROUTES.ADMIN_DEPARTMENT}/${encodeURIComponent(dept.label)}`);
+                    setSidebarOpen(false);
+                  }}
+                >
                   <span className="sidebar-sublink-icon">{dept.icon}</span>
                   {dept.label}
                 </button>

@@ -27,7 +27,7 @@ class CustomerController {
       const { name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, description } = req.body;
       if (!name) return errorResponse(res, 'Name is required', 400);
       const attachment = req.file ? req.file.filename : undefined;
-      const customer = await customerService.createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description });
+      const customer = await customerService.createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description, department: 'Sales Coordinator' });
       return successResponse(res, { customer }, 'Inquiry submitted successfully', 201);
     } catch (error) {
       return errorResponse(res, error.message, 400, error);

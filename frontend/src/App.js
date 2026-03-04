@@ -20,6 +20,7 @@ import CreateTaskPage from './pages/CreateTaskPage';
 import EditTaskPage from './pages/EditTaskPage';
 import AddMemberPage from './pages/AddMemberPage';
 import InquiryPage from './pages/InquiryPage';
+import DepartmentDetailPage from './pages/DepartmentDetailPage';
 
 // Inner component that uses useAuth
 const AppRoutes = () => {
@@ -74,6 +75,7 @@ const AppRoutes = () => {
         <Route path={ROUTES.ADMIN_CREATE_TASK} element={<CreateTaskPage />} />
         <Route path={`${ROUTES.ADMIN_EDIT_TASK}/:id`} element={<EditTaskPage />} />
         <Route path={ROUTES.ADMIN_ADD_MEMBER} element={<AddMemberPage />} />
+        <Route path={`${ROUTES.ADMIN_DEPARTMENT}/:dept`} element={<DepartmentDetailPage />} />
       </Route>
     </Routes>
   );
