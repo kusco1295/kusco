@@ -137,6 +137,31 @@
 
 .inq-file-remove:hover { color: #dc2626; }
 
+.inq-file-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.inq-file-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f3f4f6;
+  border-radius: 20px;
+  padding: 5px 10px 5px 12px;
+  font-size: 13px;
+  color: #374151;
+  max-width: 220px;
+}
+
+.inq-file-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Actions */
 .inq-actions {
   display: flex;

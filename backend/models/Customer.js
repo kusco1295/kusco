@@ -13,9 +13,28 @@ const customerSchema = new mongoose.Schema(
     liquid: { type: String, trim: true },
     temperature: { type: String, trim: true },
     pressure: { type: String, trim: true },
-    attachment: { type: String },
+    attachments: [{ type: String }],
     description: { type: String, trim: true },
     department: { type: String, trim: true },
+    forwardedTo: { type: String, trim: true },
+    forwardHistory: [
+      {
+        fromDept:    { type: String, trim: true },
+        toDept:      { type: String, trim: true },
+        forwardedBy: { type: String, trim: true },
+        comment:     { type: String, trim: true },
+        attachments: [{ type: String }],
+        createdAt:   { type: Date, default: Date.now },
+      },
+    ],
+    comments: [
+      {
+        text:       { type: String, trim: true },
+        authorName: { type: String, trim: true },
+        authorDept: { type: String, trim: true },
+        createdAt:  { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

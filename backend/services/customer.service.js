@@ -5,9 +5,9 @@ class CustomerService {
     return await Customer.find().sort({ createdAt: -1 });
   }
 
-  async createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description, department }) {
+  async createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachments, description, department }) {
     if (!name) throw new Error('Customer name is required');
-    const customer = new Customer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description, department });
+    const customer = new Customer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachments, description, department });
     await customer.save();
     return customer;
   }
@@ -28,6 +28,24 @@ class CustomerService {
     if (pressure !== undefined)  customer.pressure      = pressure;
     if (attachment !== undefined) customer.attachment   = attachment;
     if (description !== undefined) customer.description = description;
+    await customer.save();
+    return customer;
+  }
+
+  async addComment(id, text, authorName, authorDept) {
+    const customer = await Customer.findById(id);
+    if (!customer) throw new Error('Customer not found');
+    customer.comments.push({ text, authorName, authorDept });
+    await customer.save();
+    return customer;
+  }
+
+  async forwardInquiry(id, department, forwardedBy, comment, attachments) {
+    const customer = await Customer.findById(id);
+    if (!customer) throw new Error('Customer not found');
+    const fromDept = customer.forwardedTo || customer.department;
+    customer.forwardedTo = department;
+    customer.forwardHistory.push({ fromDept, toDept: department, forwardedBy, comment, attachments });
     await customer.save();
     return customer;
   }

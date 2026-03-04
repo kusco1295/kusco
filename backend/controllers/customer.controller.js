@@ -1,4 +1,5 @@
 const customerService = require('../services/customer.service');
+const adminService    = require('../services/admin.service');
 const { successResponse, errorResponse } = require('../utils/response.util');
 
 class CustomerController {
@@ -26,8 +27,8 @@ class CustomerController {
     try {
       const { name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, description } = req.body;
       if (!name) return errorResponse(res, 'Name is required', 400);
-      const attachment = req.file ? req.file.filename : undefined;
-      const customer = await customerService.createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description, department: 'Sales Coordinator' });
+      const attachments = req.files ? req.files.map(f => f.filename) : [];
+      const customer = await customerService.createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachments, description, department: 'Sales Coordinator' });
       return successResponse(res, { customer }, 'Inquiry submitted successfully', 201);
     } catch (error) {
       return errorResponse(res, error.message, 400, error);
@@ -41,6 +42,33 @@ class CustomerController {
       const attachment = req.file ? req.file.filename : undefined;
       const customer = await customerService.updateCustomer(id, { name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description });
       return successResponse(res, { customer }, 'Customer updated successfully', 200);
+    } catch (error) {
+      return errorResponse(res, error.message, 400, error);
+    }
+  }
+
+  async addComment(req, res) {
+    try {
+      const { id } = req.params;
+      const { text } = req.body;
+      if (!text) return errorResponse(res, 'Comment text is required', 400);
+      const admin = await adminService.getAdminById(req.user.id);
+      const customer = await customerService.addComment(id, text, admin.name, admin.department || '');
+      return successResponse(res, { customer }, 'Comment added', 200);
+    } catch (error) {
+      return errorResponse(res, error.message, 400, error);
+    }
+  }
+
+  async forwardInquiry(req, res) {
+    try {
+      const { id } = req.params;
+      const { department, comment } = req.body;
+      if (!department) return errorResponse(res, 'Department is required', 400);
+      const admin = await adminService.getAdminById(req.user.id);
+      const attachments = req.files ? req.files.map(f => f.filename) : [];
+      const customer = await customerService.forwardInquiry(id, department, admin.name, comment, attachments);
+      return successResponse(res, { customer }, 'Inquiry forwarded', 200);
     } catch (error) {
       return errorResponse(res, error.message, 400, error);
     }

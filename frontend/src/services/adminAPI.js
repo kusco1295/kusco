@@ -35,6 +35,14 @@ export const customerAPI = {
   update: (id, data) => api.put(`/customers/${id}`, data),
   delete: (id) => api.delete(`/customers/${id}`),
   submitInquiry: (formData) => api.post('/customers/inquiry', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  addComment: (id, text) => api.post(`/customers/${id}/comment`, { text }),
+  forwardInquiry: (id, department, comment, files) => {
+    const fd = new FormData();
+    fd.append('department', department);
+    fd.append('comment', comment);
+    if (files) files.forEach(f => fd.append('attachments', f));
+    return api.post(`/customers/${id}/forward`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
 };
 
 export default api;

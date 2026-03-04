@@ -21,7 +21,7 @@ const InquiryPage = () => {
     pressure: '',
     description: '',
   });
-  const [attachment, setAttachment] = useState(null);
+  const [attachments, setAttachments] = useState([]);
   const [error, setError]           = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess]       = useState(false);
@@ -29,10 +29,14 @@ const InquiryPage = () => {
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleFileChange = (e) => setAttachment(e.target.files[0] || null);
-  const removeFile = () => {
-    setAttachment(null);
-    document.getElementById('inq-attachment').value = '';
+  const handleFileChange = (e) => {
+    const newFiles = Array.from(e.target.files);
+    if (!newFiles.length) return;
+    setAttachments((prev) => [...prev, ...newFiles]);
+    e.target.value = '';
+  };
+  const removeFile = (idx) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e) => {
@@ -42,7 +46,7 @@ const InquiryPage = () => {
 
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-    if (attachment) fd.append('attachment', attachment);
+    attachments.forEach(f => fd.append('attachments', f));
 
     try {
       setSubmitting(true);
@@ -134,19 +138,26 @@ const InquiryPage = () => {
               <textarea name="description" placeholder="Describe your requirements..." rows={4} value={form.description} onChange={handleChange} />
             </div>
             <div className="inq-group inq-full">
-              <label>Attachment</label>
+              <label>Attachments</label>
               <div className="inq-file-area">
                 <label className="inq-file-label" htmlFor="inq-attachment">
                   <MdAttachFile />
-                  {attachment ? attachment.name : 'Click to upload file (max 10MB)'}
+                  Click to upload files (max 10MB each)
                 </label>
-                <input id="inq-attachment" type="file" onChange={handleFileChange} style={{ display: 'none' }} />
-                {attachment && (
-                  <button type="button" className="inq-file-remove" onClick={removeFile}>
-                    <MdClose />
-                  </button>
-                )}
+                <input id="inq-attachment" type="file" multiple onChange={handleFileChange} style={{ display: 'none' }} />
               </div>
+              {attachments.length > 0 && (
+                <div className="inq-file-list">
+                  {attachments.map((f, i) => (
+                    <div key={i} className="inq-file-item">
+                      <span>{f.name}</span>
+                      <button type="button" className="inq-file-remove" onClick={() => removeFile(i)}>
+                        <MdClose />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

@@ -1,36 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack } from 'react-icons/md';
+import { MdArrowBack, MdForward, MdAttachFile, MdClose } from 'react-icons/md';
 import { customerAPI } from '../services/adminAPI';
 import { ROUTES } from '../constants/endpoints';
 import '../styles/DepartmentDetail.css';
+
+const DEPARTMENTS = [
+  'Planning Dept', 'Design Dept', 'Purchase Dept', 'Sales Dept',
+  'Sales Coordinator', 'Account Dept', 'Production Dept', 'Service Dept',
+];
 
 const DepartmentDetailPage = () => {
   const { dept }  = useParams();
   const navigate  = useNavigate();
   const deptName  = decodeURIComponent(dept);
 
-  const [inquiries, setInquiries] = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState('');
+  const [inquiries, setInquiries]   = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState('');
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await customerAPI.getAll();
-        const all = res.data.data.customers;
-        setInquiries(all.filter((c) => c.department === deptName));
-      } catch {
-        setError('Failed to load inquiries.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [deptName]);
+  // per-inquiry forward state
+  const [forwardOpen, setForwardOpen]       = useState({});
+  const [forwardDept, setForwardDept]       = useState({});
+  const [forwardComment, setForwardComment] = useState({});
+  const [forwardFiles, setForwardFiles]     = useState({});
+  const [forwardLoading, setForwardLoading] = useState({});
+
+  const load = async () => {
+    try {
+      const res = await customerAPI.getAll();
+      const all = res.data.data.customers;
+      setInquiries(
+        all.filter((c) =>
+          c.forwardedTo === deptName ||
+          (c.department === deptName && !c.forwardedTo)
+        )
+      );
+    } catch {
+      setError('Failed to load inquiries.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, [deptName]);
+
+  const handleForward = async (id) => {
+    const dept = forwardDept[id];
+    if (!dept) return;
+    if (!forwardComment[id]?.trim()) return;
+    setForwardLoading((p) => ({ ...p, [id]: true }));
+    try {
+      await customerAPI.forwardInquiry(id, dept, forwardComment[id] || '', forwardFiles[id] || []);
+      setForwardOpen((p) => ({ ...p, [id]: false }));
+      setForwardDept((p) => ({ ...p, [id]: '' }));
+      setForwardComment((p) => ({ ...p, [id]: '' }));
+      setForwardFiles((p) => ({ ...p, [id]: [] }));
+      await load();
+    } catch { /* silent */ }
+    finally { setForwardLoading((p) => ({ ...p, [id]: false })); }
+  };
 
   const formatDate = (d) =>
     new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+  const formatTime = (d) =>
+    new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="page-container">
@@ -55,90 +90,239 @@ const DepartmentDetailPage = () => {
 
       {!loading && inquiries.length > 0 && (
         <div className="dept-inq-list">
-          {inquiries.map((inq) => (
-            <div key={inq._id} className="dept-inq-card">
+          {inquiries.map((inq) => {
+            const isForwarded = inq.forwardedTo === deptName;
+            return (
+              <div key={inq._id} className="dept-inq-card">
 
-              <div className="inq-card-section">
-                <div className="inq-card-section-title">Contact Details</div>
-                <div className="inq-card-grid">
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Company</span>
-                    <span className="inq-field-value">{inq.company || '—'}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Name</span>
-                    <span className="inq-field-value">{inq.name}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Phone</span>
-                    <span className="inq-field-value">{inq.phone || '—'}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Email</span>
-                    <span className="inq-field-value">{inq.email || '—'}</span>
-                  </div>
-                  <div className="inq-card-field inq-card-field--full">
-                    <span className="inq-field-label">Address</span>
-                    <span className="inq-field-value">{inq.address || '—'}</span>
+                {isForwarded && (() => {
+                  const latest = inq.forwardHistory?.slice(-1)[0];
+                  return (
+                    <div className="inq-forwarded-badge">
+                      <div className="inq-forwarded-badge-title">
+                        Forwarded by <strong>{latest?.forwardedBy || 'Unknown'}</strong>
+                        {latest?.fromDept && <span className="inq-forwarded-from"> from {latest.fromDept}</span>}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Contact Details */}
+                <div className="inq-card-section">
+                  <div className="inq-card-section-title">Contact Details</div>
+                  <div className="inq-card-grid">
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Company</span>
+                      <span className="inq-field-value">{inq.company || '—'}</span>
+                    </div>
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Name</span>
+                      <span className="inq-field-value">{inq.name}</span>
+                    </div>
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Phone</span>
+                      <span className="inq-field-value">{inq.phone || '—'}</span>
+                    </div>
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Email</span>
+                      <span className="inq-field-value">{inq.email || '—'}</span>
+                    </div>
+                    <div className="inq-card-field inq-card-field--full">
+                      <span className="inq-field-label">Address</span>
+                      <span className="inq-field-value">{inq.address || '—'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="inq-card-section">
-                <div className="inq-card-section-title">Equipment Details</div>
-                <div className="inq-card-grid">
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Equipment Name</span>
-                    <span className="inq-field-value">{inq.equipmentName || '—'}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Make</span>
-                    <span className="inq-field-value">{inq.make || '—'}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Model No</span>
-                    <span className="inq-field-value">{inq.modelNo || '—'}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Liquid</span>
-                    <span className="inq-field-value">{inq.liquid || '—'}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Temperature</span>
-                    <span className="inq-field-value">{inq.temperature || '—'}</span>
-                  </div>
-                  <div className="inq-card-field">
-                    <span className="inq-field-label">Pressure</span>
-                    <span className="inq-field-value">{inq.pressure || '—'}</span>
-                  </div>
-                  {inq.description && (
-                    <div className="inq-card-field inq-card-field--full">
-                      <span className="inq-field-label">Description</span>
-                      <span className="inq-field-value">{inq.description}</span>
+                {/* Equipment Details */}
+                <div className="inq-card-section">
+                  <div className="inq-card-section-title">Equipment Details</div>
+                  <div className="inq-card-grid">
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Equipment Name</span>
+                      <span className="inq-field-value">{inq.equipmentName || '—'}</span>
                     </div>
-                  )}
-                  {inq.attachment && (
-                    <div className="inq-card-field inq-card-field--full">
-                      <span className="inq-field-label">Attachment</span>
-                      <a
-                        className="inq-attachment-link"
-                        href={`${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/${inq.attachment}`}
-                        target="_blank"
-                        rel="noreferrer"
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Make</span>
+                      <span className="inq-field-value">{inq.make || '—'}</span>
+                    </div>
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Model No</span>
+                      <span className="inq-field-value">{inq.modelNo || '—'}</span>
+                    </div>
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Liquid</span>
+                      <span className="inq-field-value">{inq.liquid || '—'}</span>
+                    </div>
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Temperature</span>
+                      <span className="inq-field-value">{inq.temperature || '—'}</span>
+                    </div>
+                    <div className="inq-card-field">
+                      <span className="inq-field-label">Pressure</span>
+                      <span className="inq-field-value">{inq.pressure || '—'}</span>
+                    </div>
+                    {inq.description && (
+                      <div className="inq-card-field inq-card-field--full">
+                        <span className="inq-field-label">Description</span>
+                        <span className="inq-field-value">{inq.description}</span>
+                      </div>
+                    )}
+                    {inq.attachments?.length > 0 && (
+                      <div className="inq-card-field inq-card-field--full">
+                        <span className="inq-field-label">Attachments</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {inq.attachments.map((file, ai) => (
+                            <a
+                              key={ai}
+                              className="inq-attachment-link"
+                              href={`${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/${file}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              File {ai + 1}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Forward */}
+                <div className="inq-card-section">
+                  <div className="inq-card-section-title">Forward Inquiry</div>
+                  {!forwardOpen[inq._id] ? (
+                    <button
+                      className="inq-forward-btn"
+                      onClick={() => setForwardOpen((p) => ({ ...p, [inq._id]: true }))}
+                    >
+                      <MdForward /> Forward to Department
+                    </button>
+                  ) : (
+                    <div className="inq-forward-form">
+                      <select
+                        className="inq-forward-select"
+                        value={forwardDept[inq._id] || ''}
+                        onChange={(e) => setForwardDept((p) => ({ ...p, [inq._id]: e.target.value }))}
                       >
-                        View File
-                      </a>
+                        <option value="">— Select department —</option>
+                        {DEPARTMENTS.filter((d) => d !== deptName).map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                      <div className="inq-forward-comment-wrap">
+                        <input
+                          type="text"
+                          className="inq-forward-comment-input"
+                          placeholder="Add a comment (required)"
+                          value={forwardComment[inq._id] || ''}
+                          onChange={(e) => setForwardComment((p) => ({ ...p, [inq._id]: e.target.value }))}
+                        />
+                        <label className="inq-forward-file-label" title="Attach files">
+                          <MdAttachFile />
+                          <input
+                            type="file"
+                            multiple
+                            style={{ display: 'none' }}
+                            onChange={(e) => {
+                              const newFiles = Array.from(e.target.files);
+                              setForwardFiles((p) => ({ ...p, [inq._id]: [...(p[inq._id] || []), ...newFiles] }));
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                      </div>
+                      {forwardFiles[inq._id]?.length > 0 && (
+                        <div className="inq-forward-file-list">
+                          {forwardFiles[inq._id].map((f, i) => (
+                            <div key={i} className="inq-forward-file-item">
+                              <span>{f.name}</span>
+                              <button
+                                type="button"
+                                className="inq-forward-file-remove"
+                                onClick={() => setForwardFiles((p) => ({
+                                  ...p,
+                                  [inq._id]: p[inq._id].filter((_, idx) => idx !== i)
+                                }))}
+                              >
+                                <MdClose />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="inq-forward-actions">
+                        <button
+                          className="inq-btn-cancel"
+                          onClick={() => setForwardOpen((p) => ({ ...p, [inq._id]: false }))}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="inq-btn-forward"
+                          onClick={() => handleForward(inq._id)}
+                          disabled={forwardLoading[inq._id] || !forwardDept[inq._id] || !forwardComment[inq._id]?.trim()}
+                        >
+                          {forwardLoading[inq._id] ? 'Forwarding...' : 'Forward'}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
 
-              <div className="inq-card-footer">
-                Submitted on {formatDate(inq.createdAt)}
-              </div>
+                {/* Comments */}
+                <div className="inq-card-section">
+                  <div className="inq-card-section-title">Comments</div>
+                  {((inq.forwardHistory?.length > 0) || (inq.comments?.length > 0)) ? (
+                    <div className="inq-comments-list">
+                      {/* Forward history — latest first */}
+                      {[...(inq.forwardHistory || [])].reverse().map((fh, i) => (
+                        <div key={`fh-${i}`} className="inq-comment-item inq-comment-item--forward">
+                          <div className="inq-comment-meta">
+                            <span className="inq-comment-author">{fh.forwardedBy || 'Unknown'}</span>
+                            <span className="inq-comment-dept">{fh.fromDept}</span>
+                            <span className="inq-comment-time">{formatTime(fh.createdAt)}</span>
+                          </div>
+                          <p className="inq-comment-text">{fh.comment}</p>
+                          {fh.attachments?.map((file, ai) => (
+                            <a
+                              key={ai}
+                              className="inq-comment-attachment"
+                              href={`${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/${file}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <MdAttachFile /> Attachment {fh.attachments.length > 1 ? ai + 1 : ''}
+                            </a>
+                          ))}
+                        </div>
+                      ))}
+                      {/* Regular comments — latest first */}
+                      {[...(inq.comments || [])].reverse().map((c, i) => (
+                        <div key={`c-${i}`} className="inq-comment-item">
+                          <div className="inq-comment-meta">
+                            <span className="inq-comment-author">{c.authorName || 'Unknown'}</span>
+                            {c.authorDept && <span className="inq-comment-dept">{c.authorDept}</span>}
+                            <span className="inq-comment-time">{formatTime(c.createdAt)}</span>
+                          </div>
+                          <p className="inq-comment-text">{c.text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="inq-no-comments">No comments yet.</p>
+                  )}
 
-            </div>
-          ))}
+                </div>
+
+                <div className="inq-card-footer">
+                  Submitted on {formatDate(inq.createdAt)}
+                </div>
+
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
