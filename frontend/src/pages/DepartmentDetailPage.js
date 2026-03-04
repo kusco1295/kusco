@@ -278,6 +278,11 @@ const DepartmentDetailPage = () => {
                           </button>
                         </>
                       )}
+                      {deptName === 'Design Dept' && (
+                        <button className="inq-material-btn">
+                          Material Selection
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div className="inq-forward-form">

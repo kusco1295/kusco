@@ -37,6 +37,22 @@
 
 .inq-proforma-btn:hover { opacity: 0.88; }
 
+.inq-material-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.inq-material-btn:hover { opacity: 0.88; }
+
 .dept-detail-header {
   display: flex;
   align-items: center;

@@ -73,8 +73,8 @@ const AdminLayout = () => {
             className="sidebar-link sidebar-link--btn"
             onClick={() => setWorkOpen((o) => !o)}
           >
-            <span className="sidebar-icon"><MdBusiness /></span>
-            <span className="sidebar-label">Work</span>
+            <span className="sidebar-icon"><MdAssignment /></span>
+            <span className="sidebar-label">Inquiry</span>
             <span className="sidebar-expand-icon">
               {workOpen ? <MdExpandLess /> : <MdExpandMore />}
             </span>
