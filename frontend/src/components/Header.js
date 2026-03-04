@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiChevronDown, FiMenu, FiX } from "react-icons/fi";
+import { ROUTES } from "../constants/endpoints";
 
 const Header = () => {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef(null);
 
@@ -109,10 +112,18 @@ const Header = () => {
             </div>
           ))}
 
+          {/* Inquiry Button */}
+          <button
+            onClick={() => navigate(ROUTES.INQUIRY)}
+            className="ml-2 inline-block px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-full shadow hover:from-purple-600 hover:to-indigo-700 transition"
+          >
+            Inquiry
+          </button>
+
           {/* Contact Us Button */}
           <a
             href="#contact"
-            className="ml-4 inline-block px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold rounded-full shadow hover:from-yellow-500 hover:to-orange-600 transition"
+            className="ml-2 inline-block px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold rounded-full shadow hover:from-yellow-500 hover:to-orange-600 transition"
           >
             Contact Us
           </a>
@@ -175,9 +186,16 @@ const Header = () => {
               </div>
             ))}
 
+            <button
+              onClick={() => { navigate(ROUTES.INQUIRY); setSidebarOpen(false); }}
+              className="mt-4 w-full text-center px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-full shadow hover:from-purple-600 hover:to-indigo-700 transition"
+            >
+              Inquiry
+            </button>
+
             <a
               href="#contact"
-              className="mt-4 inline-block w-full text-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold rounded-full shadow hover:from-yellow-500 hover:to-orange-600 transition"
+              className="mt-2 inline-block w-full text-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold rounded-full shadow hover:from-yellow-500 hover:to-orange-600 transition"
               onClick={() => setSidebarOpen(false)}
             >
               Contact Us

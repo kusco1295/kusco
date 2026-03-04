@@ -13,9 +13,22 @@ class CustomerController {
 
   async create(req, res) {
     try {
-      const { name, email, phone, company, address } = req.body;
-      const customer = await customerService.createCustomer({ name, email, phone, company, address });
+      const { name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, description } = req.body;
+      const attachment = req.file ? req.file.filename : undefined;
+      const customer = await customerService.createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description });
       return successResponse(res, { customer }, 'Customer created successfully', 201);
+    } catch (error) {
+      return errorResponse(res, error.message, 400, error);
+    }
+  }
+
+  async inquiry(req, res) {
+    try {
+      const { name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, description } = req.body;
+      if (!name) return errorResponse(res, 'Name is required', 400);
+      const attachment = req.file ? req.file.filename : undefined;
+      const customer = await customerService.createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description });
+      return successResponse(res, { customer }, 'Inquiry submitted successfully', 201);
     } catch (error) {
       return errorResponse(res, error.message, 400, error);
     }
@@ -24,8 +37,9 @@ class CustomerController {
   async update(req, res) {
     try {
       const { id } = req.params;
-      const { name, email, phone, company, address } = req.body;
-      const customer = await customerService.updateCustomer(id, { name, email, phone, company, address });
+      const { name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, description } = req.body;
+      const attachment = req.file ? req.file.filename : undefined;
+      const customer = await customerService.updateCustomer(id, { name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachment, description });
       return successResponse(res, { customer }, 'Customer updated successfully', 200);
     } catch (error) {
       return errorResponse(res, error.message, 400, error);

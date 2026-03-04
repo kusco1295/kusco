@@ -34,6 +34,7 @@ export const customerAPI = {
   create: (data) => api.post('/customers', data),
   update: (id, data) => api.put(`/customers/${id}`, data),
   delete: (id) => api.delete(`/customers/${id}`),
+  submitInquiry: (formData) => api.post('/customers/inquiry', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 export default api;

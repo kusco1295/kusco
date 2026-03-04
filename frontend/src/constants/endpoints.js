@@ -18,6 +18,7 @@ export const ROUTES = {
   ADMIN_CREATE_TASK: '/admin/create-task',
   ADMIN_EDIT_TASK: '/admin/edit-task',
   ADMIN_ADD_MEMBER: '/admin/add-member',
+  INQUIRY: '/inquiry',
   ADMIN_MESSAGES: '/admin/messages',
   ADMIN_TEAMS: '/admin/teams',
 };
