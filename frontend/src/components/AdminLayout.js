@@ -31,8 +31,9 @@ const navItems = [
 ];
 
 const AdminLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [workOpen, setWorkOpen]       = useState(false);
+  const [sidebarOpen, setSidebarOpen]         = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [workOpen, setWorkOpen]               = useState(false);
   const { logout, admin } = useAuth();
   const navigate = useNavigate();
 
@@ -47,7 +48,7 @@ const AdminLayout = () => {
         <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
       )}
 
-      <aside className={`admin-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+      <aside className={`admin-sidebar ${sidebarOpen ? 'sidebar-open' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <div className="sidebar-brand">
           <span className="brand-text">KUSCO Admin</span>
           <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)}>
@@ -119,6 +120,9 @@ const AdminLayout = () => {
       <div className="admin-main">
         <header className="admin-topbar">
           <button className="topbar-menu-btn" onClick={() => setSidebarOpen(true)}>
+            <MdMenu />
+          </button>
+          <button className="topbar-toggle-btn" onClick={() => setSidebarCollapsed((c) => !c)}>
             <MdMenu />
           </button>
           <span className="topbar-title">Admin Panel</span>
