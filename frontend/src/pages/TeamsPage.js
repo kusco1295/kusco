@@ -1,36 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MdPersonAdd, MdClose, MdEdit } from 'react-icons/md';
 import { adminAPI } from '../services/adminAPI';
 import { useAuth } from '../hooks/useAuth';
+import { ROUTES } from '../constants/endpoints';
 import '../styles/Teams.css';
+
+const DEPARTMENT_OPTIONS = [
+  'planning dept',
+  'design dept',
+  'purchase dept',
+  'sales dept',
+  'account dept',
+  'production dept',
+  'service dept',
+];
 
 const roleColors = {
   superadmin: { bg: '#ede9fe', color: '#7c3aed' },
-  admin: { bg: '#dbeafe', color: '#1d4ed8' },
-  member: { bg: '#d1fae5', color: '#065f46' },
+  admin:      { bg: '#dbeafe', color: '#1d4ed8' },
+  member:     { bg: '#d1fae5', color: '#065f46' },
 };
 
-const defaultAddForm = { name: '', email: '', password: '', confirmPassword: '', role: 'member' };
-
 const TeamsPage = () => {
+  const navigate = useNavigate();
   const { admin } = useAuth();
   const isAdmin = admin?.role === 'admin' || admin?.role === 'superadmin';
 
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  // Add modal
-  const [addOpen, setAddOpen] = useState(false);
-  const [addForm, setAddForm] = useState(defaultAddForm);
-  const [addError, setAddError] = useState('');
-  const [addSubmitting, setAddSubmitting] = useState(false);
+  const [error, setError]     = useState('');
 
   // Edit modal
-  const [editOpen, setEditOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState(null);
-  const [editForm, setEditForm] = useState({ name: '', email: '', role: 'member' });
-  const [editError, setEditError] = useState('');
+  const [editOpen, setEditOpen]         = useState(false);
+  const [editTarget, setEditTarget]     = useState(null);
+  const [editForm, setEditForm]         = useState({ name: '', email: '', role: 'member', department: '' });
+  const [editError, setEditError]       = useState('');
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   const fetchMembers = async () => {
@@ -38,7 +43,7 @@ const TeamsPage = () => {
       setLoading(true);
       const response = await adminAPI.getAllMembers();
       setMembers(response.data.data.admins);
-    } catch (err) {
+    } catch {
       setError('Failed to load members.');
     } finally {
       setLoading(false);
@@ -47,45 +52,10 @@ const TeamsPage = () => {
 
   useEffect(() => { fetchMembers(); }, []);
 
-  // ── Add handlers ──
-  const openAdd = () => {
-    setAddForm(defaultAddForm);
-    setAddError('');
-    setAddOpen(true);
-  };
-
-  const closeAdd = () => { setAddOpen(false); setAddError(''); };
-
-  const handleAddChange = (e) =>
-    setAddForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    setAddError('');
-    if (!addForm.name || !addForm.email || !addForm.password || !addForm.confirmPassword) {
-      setAddError('All fields are required.');
-      return;
-    }
-    if (addForm.password !== addForm.confirmPassword) {
-      setAddError('Passwords do not match.');
-      return;
-    }
-    try {
-      setAddSubmitting(true);
-      await adminAPI.signup(addForm);
-      closeAdd();
-      fetchMembers();
-    } catch (err) {
-      setAddError(err.response?.data?.message || 'Failed to add member.');
-    } finally {
-      setAddSubmitting(false);
-    }
-  };
-
   // ── Edit handlers ──
   const openEdit = (member) => {
     setEditTarget(member);
-    setEditForm({ name: member.name, email: member.email, role: member.role });
+    setEditForm({ name: member.name, email: member.email, role: member.role, department: member.department || '' });
     setEditError('');
     setEditOpen(true);
   };
@@ -147,7 +117,7 @@ const TeamsPage = () => {
           </p>
         </div>
         {isAdmin && (
-          <button className="btn-add-member" onClick={openAdd}>
+          <button className="btn-add-member" onClick={() => navigate(ROUTES.ADMIN_ADD_MEMBER)}>
             <MdPersonAdd />
             Add Member
           </button>
@@ -181,11 +151,11 @@ const TeamsPage = () => {
                     )}
                   </div>
                   <p className="member-email">{member.email}</p>
+                  {member.department && (
+                    <p className="member-department">{member.department.charAt(0).toUpperCase() + member.department.slice(1)}</p>
+                  )}
                   <div className="member-footer">
-                    <span
-                      className="member-role-badge"
-                      style={{ background: badge.bg, color: badge.color }}
-                    >
+                    <span className="member-role-badge" style={{ background: badge.bg, color: badge.color }}>
                       {member.role}
                     </span>
                     <span className="member-joined">Joined {formatDate(member.createdAt)}</span>
@@ -194,54 +164,6 @@ const TeamsPage = () => {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Add Member Modal */}
-      {addOpen && (
-        <div className="modal-overlay" onClick={closeAdd}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Add Team Member</h3>
-              <button className="modal-close-btn" onClick={closeAdd}><MdClose /></button>
-            </div>
-            <form className="modal-form" onSubmit={handleAddSubmit}>
-              {addError && <p className="modal-error">{addError}</p>}
-              <div className="form-group">
-                <label>Full Name</label>
-                <input type="text" name="name" placeholder="Enter full name"
-                  value={addForm.name} onChange={handleAddChange} />
-              </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="Enter email address"
-                  value={addForm.email} onChange={handleAddChange} />
-              </div>
-              <div className="form-group">
-                <label>Password</label>
-                <input type="password" name="password" placeholder="Enter password"
-                  value={addForm.password} onChange={handleAddChange} />
-              </div>
-              <div className="form-group">
-                <label>Confirm Password</label>
-                <input type="password" name="confirmPassword" placeholder="Confirm password"
-                  value={addForm.confirmPassword} onChange={handleAddChange} />
-              </div>
-              <div className="form-group">
-                <label>Role</label>
-                <select name="role" value={addForm.role} onChange={handleAddChange}>
-                  <option value="member">Member</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={closeAdd}>Cancel</button>
-                <button type="submit" className="btn-submit" disabled={addSubmitting}>
-                  {addSubmitting ? 'Adding...' : 'Add Member'}
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
 
@@ -270,6 +192,15 @@ const TeamsPage = () => {
                 <select name="role" value={editForm.role} onChange={handleEditChange}>
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Department</label>
+                <select name="department" value={editForm.department} onChange={handleEditChange}>
+                  <option value="">— Select department —</option>
+                  {DEPARTMENT_OPTIONS.map((d) => (
+                    <option key={d} value={d}>{d.charAt(0).toUpperCase() + d.slice(1)}</option>
+                  ))}
                 </select>
               </div>
               <div className="modal-actions">

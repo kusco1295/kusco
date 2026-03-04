@@ -12,10 +12,13 @@
 }
 
 .btn-create-task {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 12px 22px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: #ffffff;
   border: none;
@@ -25,6 +28,8 @@
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.2s;
+  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.45);
+  z-index: 100;
 }
 
 .btn-create-task:hover { opacity: 0.9; }

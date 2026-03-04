@@ -3,7 +3,7 @@ const { generateToken } = require('../utils/jwt.util');
 const ROLES = require('../constants/roles');
 
 class AdminService {
-  async registerAdmin(name, email, password, confirmPassword, role) {
+  async registerAdmin(name, email, password, confirmPassword, role, department) {
     // Validation
     if (password !== confirmPassword) {
       throw new Error('Passwords do not match');
@@ -23,6 +23,7 @@ class AdminService {
       email,
       password,
       role: assignedRole,
+      department: department || null,
     });
 
     await admin.save();
@@ -36,6 +37,7 @@ class AdminService {
         name: admin.name,
         email: admin.email,
         role: admin.role,
+        department: admin.department,
       },
     };
   }
@@ -66,13 +68,14 @@ class AdminService {
     };
   }
 
-  async updateAdmin(id, { name, email, role }) {
+  async updateAdmin(id, { name, email, role, department }) {
     const admin = await Admin.findById(id);
     if (!admin) throw new Error('Member not found');
 
     if (name) admin.name = name;
     if (email) admin.email = email;
     if (role && [ROLES.ADMIN, ROLES.MEMBER].includes(role)) admin.role = role;
+    if (department !== undefined) admin.department = department || null;
 
     await admin.save();
 
@@ -81,6 +84,7 @@ class AdminService {
       name: admin.name,
       email: admin.email,
       role: admin.role,
+      department: admin.department,
     };
   }
 
@@ -91,6 +95,7 @@ class AdminService {
       name: admin.name,
       email: admin.email,
       role: admin.role,
+      department: admin.department,
       createdAt: admin.createdAt,
     }));
   }
@@ -106,6 +111,7 @@ class AdminService {
       name: admin.name,
       email: admin.email,
       role: admin.role,
+      department: admin.department,
     };
   }
 }

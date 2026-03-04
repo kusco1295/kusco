@@ -25,6 +25,19 @@ const adminSchema = new mongoose.Schema(
       enum: ['admin', 'superadmin', 'member'],
       default: 'member',
     },
+    department: {
+      type: String,
+      enum: [
+        'planning dept',
+        'design dept',
+        'purchase dept',
+        'sales dept',
+        'account dept',
+        'production dept',
+        'service dept',
+      ],
+      default: null,
+    },
   },
   { timestamps: true }
 );

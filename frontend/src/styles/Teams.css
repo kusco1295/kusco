@@ -8,10 +8,13 @@
 }
 
 .btn-add-member {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 12px 22px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: #ffffff;
   border: none;
@@ -21,6 +24,8 @@
   cursor: pointer;
   white-space: nowrap;
   transition: opacity 0.2s;
+  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.45);
+  z-index: 100;
 }
 
 .btn-add-member:hover {
@@ -136,6 +141,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.member-department {
+  font-size: 12px;
+  color: #667eea;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  text-transform: capitalize;
 }
 
 .member-footer {
