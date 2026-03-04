@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack, MdForward, MdAttachFile, MdClose, MdDownload } from 'react-icons/md';
+import { MdArrowBack, MdForward, MdAttachFile, MdClose, MdDownload, MdBusiness, MdEmail, MdLocationOn, MdPhone } from 'react-icons/md';
 import { customerAPI } from '../services/adminAPI';
 import { ROUTES } from '../constants/endpoints';
 import '../styles/DepartmentDetail.css';
@@ -18,6 +18,10 @@ const DepartmentDetailPage = () => {
   const [inquiries, setInquiries]   = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState('');
+
+  // expanded cards
+  const [expanded, setExpanded] = useState({});
+  const toggleExpand = (id) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   // per-inquiry forward state
   const [forwardOpen, setForwardOpen]       = useState({});
@@ -110,17 +114,40 @@ const DepartmentDetailPage = () => {
         <div className="dept-inq-list">
           {inquiries.map((inq) => {
             const isForwarded = inq.forwardedTo === deptName;
+            const isOpen = !!expanded[inq._id];
             return (
               <div key={inq._id} className="dept-inq-card">
+
+                {/* Summary row — only visible when collapsed */}
+                {!isOpen && (
+                  <div className="inq-card-summary" onClick={() => toggleExpand(inq._id)}>
+                    <div className="inq-card-summary-info">
+                      <span className="inq-summary-company"><MdBusiness /> {inq.company || inq.name}</span>
+                      <span className="inq-summary-detail"><MdPhone /> {inq.phone || '—'}</span>
+                      <span className="inq-summary-detail"><MdEmail /> {inq.email || '—'}</span>
+                      <span className="inq-summary-detail"><MdLocationOn /> {inq.address || '—'}</span>
+                    </div>
+                    <span className="inq-summary-chevron">▾</span>
+                  </div>
+                )}
+
+                {isOpen && <>
+
+                {!isForwarded && (
+                  <div className="inq-card-collapse-btn" onClick={() => toggleExpand(inq._id)}>
+                    ▴ Collapse
+                  </div>
+                )}
 
                 {isForwarded && (() => {
                   const latest = inq.forwardHistory?.slice(-1)[0];
                   return (
-                    <div className="inq-forwarded-badge">
+                    <div className="inq-forwarded-badge inq-forwarded-badge--clickable" onClick={() => toggleExpand(inq._id)}>
                       <div className="inq-forwarded-badge-title">
                         Forwarded by <strong>{latest?.forwardedBy || 'Unknown'}</strong>
                         {latest?.fromDept && <span className="inq-forwarded-from"> from {latest.fromDept}</span>}
                       </div>
+                      <span className="inq-forwarded-collapse">▴ Collapse</span>
                     </div>
                   );
                 })()}
@@ -357,6 +384,8 @@ const DepartmentDetailPage = () => {
                 <div className="inq-card-footer">
                   Submitted on {formatDate(inq.createdAt)}
                 </div>
+
+                </>}
 
               </div>
             );
