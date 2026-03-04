@@ -19,6 +19,8 @@ export const ROUTES = {
   ADMIN_EDIT_TASK: '/admin/edit-task',
   ADMIN_ADD_MEMBER: '/admin/add-member',
   INQUIRY: '/inquiry',
+  ADMIN_QUOTATION: '/admin/quotation',
+  ADMIN_PROFORMA: '/admin/proforma-invoice',
   ADMIN_MESSAGES: '/admin/messages',
   ADMIN_TEAMS: '/admin/teams',
 };

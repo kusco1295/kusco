@@ -103,6 +103,8 @@ const DepartmentDetailPage = () => {
         </div>
       </div>
 
+
+
       {loading && <p className="dept-inq-loading">Loading inquiries...</p>}
       {error   && <p className="dept-inq-error">{error}</p>}
 
@@ -126,6 +128,8 @@ const DepartmentDetailPage = () => {
                       <span className="inq-summary-detail"><MdPhone /> {inq.phone || '—'}</span>
                       <span className="inq-summary-detail"><MdEmail /> {inq.email || '—'}</span>
                       <span className="inq-summary-detail"><MdLocationOn /> {inq.address || '—'}</span>
+                      {inq.inquiryNo && <span className="inq-summary-detail">{inq.inquiryNo}</span>}
+                      <span className="inq-summary-detail">{formatDate(inq.createdAt)}</span>
                     </div>
                     <span className="inq-summary-chevron">▾</span>
                   </div>
@@ -133,24 +137,29 @@ const DepartmentDetailPage = () => {
 
                 {isOpen && <>
 
-                {!isForwarded && (
-                  <div className="inq-card-collapse-btn" onClick={() => toggleExpand(inq._id)}>
-                    ▴ Collapse
-                  </div>
-                )}
-
                 {isForwarded && (() => {
                   const latest = inq.forwardHistory?.slice(-1)[0];
                   return (
-                    <div className="inq-forwarded-badge inq-forwarded-badge--clickable" onClick={() => toggleExpand(inq._id)}>
+                    <div className="inq-forwarded-badge">
                       <div className="inq-forwarded-badge-title">
                         Forwarded by <strong>{latest?.forwardedBy || 'Unknown'}</strong>
                         {latest?.fromDept && <span className="inq-forwarded-from"> from {latest.fromDept}</span>}
                       </div>
-                      <span className="inq-forwarded-collapse">▴ Collapse</span>
                     </div>
                   );
                 })()}
+
+                {/* Inquiry No + Date */}
+                <div className="inq-inquiry-no-bar">
+                  {inq.inquiryNo && <>Inquiry No: <strong>{inq.inquiryNo}</strong>&ensp;·&ensp;</>}
+                  Submitted: <strong>{formatDate(inq.createdAt)}</strong>
+                </div>
+
+                <div className="inq-card-collapse-row">
+                  <button className="inq-card-collapse-btn" onClick={() => toggleExpand(inq._id)}>
+                    ▴ Collapse
+                  </button>
+                </div>
 
                 {/* Contact Details */}
                 <div className="inq-card-section">
@@ -246,12 +255,30 @@ const DepartmentDetailPage = () => {
                 <div className="inq-card-section">
                   <div className="inq-card-section-title">Forward Inquiry</div>
                   {!forwardOpen[inq._id] ? (
-                    <button
-                      className="inq-forward-btn"
-                      onClick={() => setForwardOpen((p) => ({ ...p, [inq._id]: true }))}
-                    >
-                      <MdForward /> Forward to Department
-                    </button>
+                    <div className="inq-forward-btn-row">
+                      <button
+                        className="inq-forward-btn"
+                        onClick={() => setForwardOpen((p) => ({ ...p, [inq._id]: true }))}
+                      >
+                        <MdForward /> Forward to Department
+                      </button>
+                      {deptName === 'Sales Coordinator' && (
+                        <>
+                          <button
+                            className="inq-quotation-btn"
+                            onClick={() => navigate(ROUTES.ADMIN_QUOTATION, { state: { inq } })}
+                          >
+                            Quotation
+                          </button>
+                          <button
+                            className="inq-proforma-btn"
+                            onClick={() => navigate(ROUTES.ADMIN_PROFORMA, { state: { inq } })}
+                          >
+                            Performa Invoice
+                          </button>
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <div className="inq-forward-form">
                       <select

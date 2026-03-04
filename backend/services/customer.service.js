@@ -7,7 +7,9 @@ class CustomerService {
 
   async createCustomer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachments, description, department }) {
     if (!name) throw new Error('Customer name is required');
-    const customer = new Customer({ name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachments, description, department });
+    const count = await Customer.countDocuments();
+    const inquiryNo = `INQ-${String(count + 1).padStart(3, '0')}`;
+    const customer = new Customer({ inquiryNo, name, email, phone, company, address, equipmentName, make, modelNo, liquid, temperature, pressure, attachments, description, department });
     await customer.save();
     return customer;
   }
