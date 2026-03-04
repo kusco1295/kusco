@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MdArrowBack, MdForward, MdAttachFile, MdClose } from 'react-icons/md';
+import { MdArrowBack, MdForward, MdAttachFile, MdClose, MdDownload } from 'react-icons/md';
 import { customerAPI } from '../services/adminAPI';
 import { ROUTES } from '../constants/endpoints';
 import '../styles/DepartmentDetail.css';
@@ -59,6 +59,24 @@ const DepartmentDetailPage = () => {
       await load();
     } catch { /* silent */ }
     finally { setForwardLoading((p) => ({ ...p, [id]: false })); }
+  };
+
+  // Strip the unique prefix (timestamp-random-) added by the upload middleware
+  const getOriginalName = (filename) => filename.replace(/^\d+-\d+-/, '').replace(/_/g, ' ');
+
+  const BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
+  const handleDownload = async (filename) => {
+    try {
+      const res = await fetch(`${BASE_URL}/uploads/${filename}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = getOriginalName(filename);
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { /* silent */ }
   };
 
   const formatDate = (d) =>
@@ -173,15 +191,23 @@ const DepartmentDetailPage = () => {
                         <span className="inq-field-label">Attachments</span>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                           {inq.attachments.map((file, ai) => (
-                            <a
-                              key={ai}
-                              className="inq-attachment-link"
-                              href={`${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/${file}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              File {ai + 1}
-                            </a>
+                            <div key={ai} className="inq-comment-attachment">
+                              <a
+                                href={`${BASE_URL}/uploads/${file}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inq-attachment-name"
+                              >
+                                <MdAttachFile /> {getOriginalName(file)}
+                              </a>
+                              <button
+                                className="inq-attachment-download"
+                                onClick={() => handleDownload(file)}
+                                title="Download"
+                              >
+                                <MdDownload />
+                              </button>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -285,17 +311,29 @@ const DepartmentDetailPage = () => {
                             <span className="inq-comment-time">{formatTime(fh.createdAt)}</span>
                           </div>
                           <p className="inq-comment-text">{fh.comment}</p>
-                          {fh.attachments?.map((file, ai) => (
-                            <a
-                              key={ai}
-                              className="inq-comment-attachment"
-                              href={`${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/${file}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <MdAttachFile /> Attachment {fh.attachments.length > 1 ? ai + 1 : ''}
-                            </a>
-                          ))}
+                          {fh.attachments?.length > 0 && (
+                            <div className="inq-comment-attachment-list">
+                              {fh.attachments.map((file, ai) => (
+                                <div key={ai} className="inq-comment-attachment">
+                                  <a
+                                    href={`${BASE_URL}/uploads/${file}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inq-attachment-name"
+                                  >
+                                    <MdAttachFile /> {getOriginalName(file)}
+                                  </a>
+                                  <button
+                                    className="inq-attachment-download"
+                                    onClick={() => handleDownload(file)}
+                                    title="Download"
+                                  >
+                                    <MdDownload />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                       {/* Regular comments — latest first */}
