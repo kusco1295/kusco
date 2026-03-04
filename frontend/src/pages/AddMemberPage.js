@@ -10,6 +10,7 @@ const DEPARTMENT_OPTIONS = [
   'design dept',
   'purchase dept',
   'sales dept',
+  'sales coordinator',
   'account dept',
   'production dept',
   'service dept',

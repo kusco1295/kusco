@@ -32,6 +32,7 @@ const adminSchema = new mongoose.Schema(
         'design dept',
         'purchase dept',
         'sales dept',
+        'sales coordinator',
         'account dept',
         'production dept',
         'service dept',
